@@ -1,0 +1,15 @@
+Title: The Dome Runner — Leaked Token (Medium/Hard)
+
+Description
+A resistance dev accidentally committed the Industrial Park access token
+to this repository and then removed it. The Dome didn’t see it,
+but can you?
+
+Goal
+Recover the token from the repository's history and submit it as:
+flag{LEAKED_GIT_TOKEN_9F3A}
+
+Hint
+Browse the commit history for this folder or use:
+git log --follow -- CTF/Q5_Leaked_Token
+git show <commit>:CTF/Q5_Leaked_Token/access_token.txt
