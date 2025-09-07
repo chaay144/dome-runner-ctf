@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- vSAFE-3 -->
+<!-- vFINAL-1 -->
 <html>
 <head>
 <meta charset="utf-8"/>
@@ -29,7 +29,6 @@
   .bad{color:var(--bad);font-weight:800;font-size:12px}
   .hint{font-size:13px;color:#d8defd;margin-top:8px}
   .hint-toggle{cursor:pointer;color:#aee8ff;text-decoration:underline}
-  #err{display:none;background:#2a0e16;border:1px solid #ff6b6b;color:#ffdede;padding:8px;border-radius:8px;margin:8px 20px}
 </style>
 </head>
 <body>
@@ -40,10 +39,9 @@
   </div>
   <div class="row" style="margin:0">
     <a class="btn btnlink" href="results.html">View Results</a>
+    <button class="btn secondary" onclick="resetProgress()">Reset Progress</button>
   </div>
 </header>
-
-<div id="err"></div>
 
 <main>
   <div id="grid" class="grid"></div>
@@ -78,99 +76,95 @@
 </div>
 
 <script>
-(function(){
-  // show JS errors on the page
-  function showErr(msg){ var e=document.getElementById('err'); e.textContent=msg; e.style.display='block'; }
-  window.onerror = function(m,src,lin,col,err){ showErr('JS error: '+m); };
-  window.onunhandledrejection = function(ev){ showErr('Promise error: '+(ev.reason&&ev.reason.message?ev.reason.message:ev.reason)); };
+/* --------- ALWAYS START FRESH EACH LOAD --------- */
+sessionStorage.removeItem('RUN');
+sessionStorage.removeItem('DATA');
 
-  // DATA (inline, no fetch)
-  var DATA = [
-    {
-      id: 6,
-      title: 'Street Terminal Boot',
-      chapter: 'Slum',
-      difficulty: 'Easy',
-      points: 5,
-      folder_url: 'https://github.com/chaay144/dome-runner-ctf/tree/main/challenges/ch06-street-terminal-boot',
-      description: 'In the slums of Dome City, a maintenance terminal binary leaked sensitive data. Your job is to inspect the binary and recover the shutdown password.',
-      hint: 'Use tools like strings or open the binary in Ghidra. The answer is inside the program (no input required).',
-      input_placeholder: 'Type your answer (e.g. DOME_BOOT_OK_7F3A)',
-      answer_hash: '5408eb37de42e51e9e66bbbfb20732c653a8b9b8de4b576f0b2d5a33b5fcd28f'
-    }
-  ];
-
-  var RUN = {};   // session-only
-
-  function pill(text){ return '<span class="pill">'+text+'</span>'; }
-
-  function renderGrid(){
-    var grid=document.getElementById('grid'); grid.innerHTML='';
-    for(var i=0;i<DATA.length;i++){
-      var c=DATA[i], done = !!RUN[c.id];
-      var html='';
-      html+='<div class="card">';
-      html+='<div class="title">'+c.id+'. '+c.title+'</div>';
-      html+='<div class="meta">'+pill(c.chapter)+' '+pill(c.difficulty+' • '+c.points+' marks')+(done?' <span class="ok">✓ Completed</span>':'')+'</div>';
-      html+='<div style="font-size:13px;min-height:48px">'+c.description+'</div>';
-      html+='<div class="row">';
-      html+='<button class="btn" onclick="openModal('+c.id+')">Open</button>';
-      html+='<a class="btn secondary btnlink" href="'+c.folder_url+'" target="_blank">Folder</a>';
-      html+='</div></div>';
-      var d=document.createElement('div'); d.innerHTML=html; grid.appendChild(d.firstChild);
-    }
+/* -------- DATA (add more challenges by appending) -------- */
+const DATA = [
+  {
+    id: 6,
+    title: "Street Terminal Boot",
+    chapter: "Slum",
+    difficulty: "Easy",
+    points: 5,
+    folder_url: "https://github.com/chaay144/dome-runner-ctf/tree/main/challenges/ch06-street-terminal-boot",
+    description: "In the slums of Dome City, a maintenance terminal binary leaked sensitive data. Your job is to inspect the binary and recover the shutdown password.",
+    hint: "Use tools like `strings` or open the binary in Ghidra. The answer is inside the program (no input required).",
+    input_placeholder: "Type your answer (e.g. DOME_BOOT_OK_7F3A)",
+    answer_hash: "5408eb37de42e51e9e66bbbfb20732c653a8b9b8de4b576f0b2d5a33b5fcd28f"
   }
+];
+/* -------------------------------------------------------- */
 
-  window.openModal=function(id){
-    var i, c=null; for(i=0;i<DATA.length;i++){ if(DATA[i].id===id){ c=DATA[i]; break; } }
-    if(!c){ showErr('No challenge with id '+id); return; }
-    window.CURRENT=c;
-    document.getElementById('m-title').textContent = c.id+'. '+c.title;
-    document.getElementById('m-meta').innerHTML = pill(c.chapter)+' '+pill(c.difficulty+' • '+c.points+' marks');
-    document.getElementById('m-desc').textContent = c.description;
-    document.getElementById('m-hint').textContent = c.hint;
-    document.getElementById('m-folder').href = c.folder_url;
-    document.getElementById('m-input').placeholder = c.input_placeholder || 'Type your answer…';
-    document.getElementById('m-input').value='';
-    var fb=document.getElementById('m-feedback'); fb.textContent=''; fb.className='';
-    document.getElementById('overlay').style.display='flex';
-    setTimeout(function(){ document.getElementById('m-input').focus(); }, 50);
-  };
-  window.closeModal=function(){ document.getElementById('overlay').style.display='none'; };
-  window.toggleHint=function(){
-    var el=document.getElementById('m-hint');
-    el.style.display = (el.style.display==='none' || el.style.display==='') ? 'block' : 'none';
-  };
+let RUN = {};            // session-only (resets on reload)
+let CURRENT = null;
 
-  function sha256Hex(str){
-    return crypto.subtle.digest('SHA-256', new TextEncoder().encode(str))
-      .then(function(buf){
-        var arr=new Uint8Array(buf), out=[], i;
-        for(i=0;i<arr.length;i++){ out.push(arr[i].toString(16).padStart(2,'0')); }
-        return out.join('');
-      });
+async function sha256Hex(s){
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
+  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+function chapterPill(ch){ return `<span class="pill">${ch}</span>` }
+function diffPill(d,p){ return `<span class="pill">${d} • ${p} marks</span>` }
+
+function renderGrid(){
+  const grid=document.getElementById("grid"); grid.innerHTML="";
+  for(const c of DATA){
+    const done = !!RUN[c.id];
+    const card=document.createElement("div"); card.className="card";
+    card.innerHTML = `
+      <div class="title">${c.id}. ${c.title}</div>
+      <div class="meta">${chapterPill(c.chapter)} ${diffPill(c.difficulty,c.points)} ${done?'<span class="ok">✓ Completed</span>':''}</div>
+      <div style="font-size:13px;min-height:48px">${c.description}</div>
+      <div class="row">
+        <button class="btn" onclick="openModal(${c.id})">Open</button>
+        <a class="btn secondary btnlink" href="${c.folder_url}" target="_blank">Folder</a>
+      </div>`;
+    grid.appendChild(card);
   }
+}
 
-  window.submitAnswer=function(){
-    var input = document.getElementById('m-input').value.replace(/^\s+|\s+$/g,'');
-    var fb=document.getElementById('m-feedback');
-    if(!input){ fb.textContent='Type an answer'; fb.className='bad'; return; }
-    sha256Hex(input).then(function(digest){
-      if(digest===window.CURRENT.answer_hash){
-        RUN[window.CURRENT.id]=true;
-        sessionStorage.setItem('RUN', JSON.stringify(RUN));
-        sessionStorage.setItem('DATA', JSON.stringify(DATA));
-        fb.textContent='✓ Correct'; fb.className='ok';
-        renderGrid();
-      }else{
-        fb.textContent='✗ Incorrect'; fb.className='bad';
-      }
-    }).catch(function(e){ showErr('Hash error: '+e); });
-  };
+function openModal(id){
+  CURRENT = DATA.find(x=>x.id===id);
+  if(!CURRENT) return;
+  document.getElementById("m-title").textContent = `${CURRENT.id}. ${CURRENT.title}`;
+  document.getElementById("m-meta").innerHTML = `${chapterPill(CURRENT.chapter)} ${diffPill(CURRENT.difficulty, CURRENT.points)}`;
+  document.getElementById("m-desc").textContent = CURRENT.description;
+  document.getElementById("m-hint").textContent = CURRENT.hint;
+  document.getElementById("m-folder").href = CURRENT.folder_url;
+  document.getElementById("m-input").placeholder = CURRENT.input_placeholder || "Type your answer…";
+  document.getElementById("m-input").value="";
+  const fb=document.getElementById("m-feedback"); fb.textContent=""; fb.className="";
+  document.getElementById("overlay").style.display = "flex";
+  setTimeout(()=>document.getElementById("m-input").focus(), 50);
+}
+function closeModal(){ document.getElementById("overlay").style.display="none"; }
+function toggleHint(){ const el=document.getElementById("m-hint"); el.style.display = el.style.display==="none" ? "block" : "none"; }
 
+async function submitAnswer(){
+  const input = document.getElementById("m-input").value.trim();
+  const fb=document.getElementById("m-feedback");
+  if(!input){ fb.textContent="Type an answer"; fb.className="bad"; return; }
+  const digest = await sha256Hex(input);
+  if(digest === CURRENT.answer_hash){
+    RUN[CURRENT.id]=true;
+    sessionStorage.setItem("RUN", JSON.stringify(RUN));
+    sessionStorage.setItem("DATA", JSON.stringify(DATA));
+    fb.textContent="✓ Correct"; fb.className="ok";
+    renderGrid();
+  }else{
+    fb.textContent="✗ Incorrect"; fb.className="bad";
+  }
+}
+
+function resetProgress(){
+  RUN = {};
+  sessionStorage.removeItem("RUN");
+  sessionStorage.removeItem("DATA");
   renderGrid();
-  document.body.insertAdjacentHTML('beforeend','<p style="color:gray">JS OK vSAFE-3</p>');
-})();
+}
+
+renderGrid();
 </script>
 </body>
 </html>
