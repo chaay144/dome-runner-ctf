@@ -1,9 +1,0 @@
-body { font-family: system-ui, Arial, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
-h1 { margin-bottom: 0.25rem; }
-.card { border: 1px solid #ddd; border-radius: 12px; padding: 1rem; margin: 1rem 0; }
-.check-area { margin-top: 0.5rem; display: flex; gap: 0.5rem; align-items: center; }
-input[type="text"] { padding: 0.5rem; width: 260px; }
-.hint { margin-top: 0.5rem; background: #f7f7ff; border-left: 4px solid #7b7bff; padding: 0.5rem 0.75rem; border-radius: 8px; }
-.success { color: #0a8a0a; font-weight: 600; }
-.error { color: #c00; font-weight: 600; }
-button.hint-btn { margin-bottom: 0.5rem; }
