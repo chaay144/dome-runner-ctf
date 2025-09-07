@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- vFINAL-1 -->
+<!-- vFINAL-CTF (6 + 7) -->
 <html>
 <head>
 <meta charset="utf-8"/>
@@ -80,7 +80,7 @@
 sessionStorage.removeItem('RUN');
 sessionStorage.removeItem('DATA');
 
-/* -------- DATA (add more challenges by appending) -------- */
+/* -------- DATA: challenges 6 and 7 -------- */
 const DATA = [
   {
     id: 6,
@@ -92,10 +92,24 @@ const DATA = [
     description: "In the slums of Dome City, a maintenance terminal binary leaked sensitive data. Your job is to inspect the binary and recover the shutdown password.",
     hint: "Use tools like `strings` or open the binary in Ghidra. The answer is inside the program (no input required).",
     input_placeholder: "Type your answer (e.g. DOME_BOOT_OK_7F3A)",
+    /* SHA-256 of DOME_BOOT_OK_7F3A */
     answer_hash: "5408eb37de42e51e9e66bbbfb20732c653a8b9b8de4b576f0b2d5a33b5fcd28f"
+  },
+  {
+    id: 7,
+    title: "Opcode Gate",
+    chapter: "Industrial Park",
+    difficulty: "Medium",
+    points: 10,
+    folder_url: "https://github.com/chaay144/dome-runner-ctf/tree/main/challenges/ch07-opcode-gate",
+    description: "The Industrial Park gate binary hides its passphrase with XOR. Reverse the decode loop and recover the passphrase.",
+    hint: "Find the encoded array and the XOR key (0x13). Recreate the decode to reveal the string.",
+    input_placeholder: "Enter the passphrase…",
+    /* SHA-256 of ACCESS_GRANTED_XOR */
+    answer_hash: "88749139f99fc8ee3f1a7475f251f2ee201d15d91b1ee7d5fefc1a144f012f57"
   }
 ];
-/* -------------------------------------------------------- */
+/* ------------------------------------------ */
 
 let RUN = {};            // session-only (resets on reload)
 let CURRENT = null;
@@ -104,8 +118,7 @@ async function sha256Hex(s){
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
   return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");
 }
-function chapterPill(ch){ return `<span class="pill">${ch}</span>` }
-function diffPill(d,p){ return `<span class="pill">${d} • ${p} marks</span>` }
+function pill(t){ return `<span class="pill">${t}</span>`; }
 
 function renderGrid(){
   const grid=document.getElementById("grid"); grid.innerHTML="";
@@ -114,7 +127,7 @@ function renderGrid(){
     const card=document.createElement("div"); card.className="card";
     card.innerHTML = `
       <div class="title">${c.id}. ${c.title}</div>
-      <div class="meta">${chapterPill(c.chapter)} ${diffPill(c.difficulty,c.points)} ${done?'<span class="ok">✓ Completed</span>':''}</div>
+      <div class="meta">${pill(c.chapter)} ${pill(c.difficulty+' • '+c.points+' marks')} ${done?'<span class="ok">✓ Completed</span>':''}</div>
       <div style="font-size:13px;min-height:48px">${c.description}</div>
       <div class="row">
         <button class="btn" onclick="openModal(${c.id})">Open</button>
@@ -128,7 +141,7 @@ function openModal(id){
   CURRENT = DATA.find(x=>x.id===id);
   if(!CURRENT) return;
   document.getElementById("m-title").textContent = `${CURRENT.id}. ${CURRENT.title}`;
-  document.getElementById("m-meta").innerHTML = `${chapterPill(CURRENT.chapter)} ${diffPill(CURRENT.difficulty, CURRENT.points)}`;
+  document.getElementById("m-meta").innerHTML = `${pill(CURRENT.chapter)} ${pill(CURRENT.difficulty+' • '+CURRENT.points+' marks')}`;
   document.getElementById("m-desc").textContent = CURRENT.description;
   document.getElementById("m-hint").textContent = CURRENT.hint;
   document.getElementById("m-folder").href = CURRENT.folder_url;
@@ -139,7 +152,7 @@ function openModal(id){
   setTimeout(()=>document.getElementById("m-input").focus(), 50);
 }
 function closeModal(){ document.getElementById("overlay").style.display="none"; }
-function toggleHint(){ const el=document.getElementById("m-hint"); el.style.display = el.style.display==="none" ? "block" : "none"; }
+function toggleHint(){ const el=document.getElementById("m-hint"); el.style.display = (el.style.display==="none"||el.style.display==="") ? "block" : "none"; }
 
 async function submitAnswer(){
   const input = document.getElementById("m-input").value.trim();
