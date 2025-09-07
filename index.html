@@ -1,85 +1,195 @@
-<!doctype html><html><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Dome Runner CTF</title>
 <style>
-  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;margin:0;background:#0b1020;color:#e7ecff}
-  header{padding:16px 20px;background:#121a33;position:sticky;top:0}
-  h1{margin:0;font-size:22px} .sub{color:#9db0f5;font-size:13px}
-  main{max-width:900px;margin:0 auto;padding:20px}
-  .card{border:1px solid #2a355d;border-radius:14px;padding:14px;margin:10px 0;background:#11193a}
-  .meta{font-size:12px;color:#c9d4ff;margin:6px 0}
-  input{width:60%;max-width:420px;padding:8px;border-radius:10px;border:1px solid #2a355d;background:#0c132a;color:#e7ecff}
-  button{margin-left:8px;padding:8px 12px;border-radius:10px;border:0;background:#66e3ff;font-weight:700}
-  .ok{color:#87ff87;font-weight:700;font-size:12px;margin-left:6px}
-  .bar{height:10px;background:#0c132a;border:1px solid #2a355d;border-radius:999px;overflow:hidden}
-  .bar>span{display:block;height:100%;background:#66e3ff;width:0%}
-  .row{display:flex;gap:12px;align-items:center;margin:12px 0}
-  .pill{padding:2px 8px;border:1px solid #2a355d;border-radius:999px;font-size:11px;margin-right:6px}
-</style></head><body>
+  :root{
+    --bg:#0b1020; --card:#121a33; --muted:#9db0f5; --text:#e7ecff;
+    --accent:#66e3ff; --accent2:#7bffb3; --ok:#87ff87; --warn:#ffd166;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#0b1020;color:var(--text);font-family:system-ui,Inter,Segoe UI,Roboto,Arial}
+  header{padding:18px 20px;background:#121a33;position:sticky;top:0;z-index:5}
+  h1{margin:0 0 6px 0;font-size:22px}
+  .sub{color:var(--muted);font-size:13px}
+  main{max-width:1100px;margin:0 auto;padding:20px}
+  .topbar{display:flex;gap:12px;align-items:center;margin-bottom:18px;flex-wrap:wrap}
+  .pill{padding:3px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.18);font-size:12px}
+  .bar{height:10px;background:#0c132a;border:1px solid #23305a;border-radius:999px;overflow:hidden;min-width:220px;flex:1}
+  .bar>span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+  .card{background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.03));
+        border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px}
+  .title{font-weight:700;margin-bottom:6px}
+  .meta{display:flex;gap:8px;flex-wrap:wrap;color:#cfe0ff;font-size:12px;margin-bottom:8px}
+  .btn{border:0;background:linear-gradient(135deg,var(--accent),var(--accent2));padding:8px 12px;border-radius:12px;color:#001018;font-weight:800;cursor:pointer}
+  .btn.secondary{background:transparent;color:var(--text);border:1px solid rgba(255,255,255,.2)}
+  a.link{color:var(--accent)}
+  .ok{color:var(--ok);font-weight:800;font-size:12px}
+
+  /* Modal */
+  .overlay{position:fixed;inset:0;background:rgba(0,0,20,.6);display:none;align-items:center;justify-content:center;padding:16px}
+  .modal{max-width:720px;width:100%;background:#0f1734;border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:16px}
+  .row{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap}
+  .hint{font-size:13px;color:#d8defd;margin-top:8px}
+  .hint-toggle{cursor:pointer;color:#aee8ff;text-decoration:underline}
+  input[type=text]{flex:1;min-width:240px;background:#0c132a;border:1px solid rgba(255,255,255,.15);border-radius:10px;color:var(--text);padding:8px 10px}
+</style>
+</head>
+<body>
 <header>
   <h1>🏙️ Dome Runner CTF</h1>
-  <div class="sub">All flags use <b>flag{...}</b>. Easy=5, Medium=10, Hard=15. Grades auto-calc.</div>
+  <div class="sub">Solve missions across Slum, Jail, Power Station, Industrial Park and CBD. Answers can be any string (not only <code>flag{...}</code>).</div>
 </header>
+
 <main>
-  <div class="row">
-    <div id="score" style="font-weight:800">Score: 0 / 0 (0%)</div>
-    <div class="bar" style="flex:1"><span id="prog"></span></div>
-    <div id="grade" class="pill">—</div>
-    <button onclick="resetAll()">Reset Progress</button>
+  <div class="topbar">
+    <div id="score" class="pill">Score: 0 / 0 (0%)</div>
+    <div class="bar"><span id="prog"></span></div>
+    <div id="grade" class="pill">Grade: —</div>
+    <button class="btn secondary" onclick="resetAll()">Reset Progress</button>
   </div>
-  <div id="list"></div>
+  <div id="grid" class="grid"></div>
 </main>
+
+<!-- Modal -->
+<div id="overlay" class="overlay" onclick="closeModal(event)">
+  <div id="modal" class="modal" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div id="m-title" class="title"></div>
+      <button class="btn secondary" onclick="closeModal()">Close</button>
+    </div>
+    <div class="meta" id="m-meta"></div>
+    <div id="m-desc" style="font-size:14px;line-height:1.5"></div>
+
+    <div class="hint">
+      <span class="hint-toggle" onclick="toggleHint()">▼ View Hint</span>
+      <div id="m-hint" style="display:none;margin-top:6px"></div>
+    </div>
+
+    <div class="row">
+      <a id="m-folder" class="btn" target="_blank">Open Challenge Folder</a>
+      <span style="font-size:12px;color:#9db0f5">Read scenario + files on GitHub</span>
+    </div>
+
+    <div class="row">
+      <input type="text" id="m-input" placeholder="Type your answer…">
+      <button class="btn" onclick="submitAnswer()">Submit</button>
+      <div id="m-done" class="ok" style="display:none">✓ Correct</div>
+    </div>
+  </div>
+</div>
+
 <script>
-  const STORE="dome_runner_progress_v1";
-  function load(){try{return JSON.parse(localStorage.getItem(STORE)||"{}")}catch(e){return {}}}
-  function save(x){localStorage.setItem(STORE,JSON.stringify(x))}
-  function resetAll(){localStorage.removeItem(STORE); location.reload()}
-  async function sha256Hex(s){const b=new TextEncoder().encode(s);const d=await crypto.subtle.digest("SHA-256",b);return[...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,"0")).join("")}
-  function grade(score,total){
-    const pct=Math.round((score/total)*1000)/10;
-    let g="—";
-    if(score<25) g="F1";
-    if(score>30) g="P2";
-    if(pct===50) g="P1";
-    if(pct>50) g="C";
-    if(pct>75) g="D";
-    if(pct>90) g="HD";
-    return {pct,g};
+const STORE="dome_runner_progress_v2"; // new key since schema changed
+let DATA=[], CURRENT=null;
+
+function load(){ try{ return JSON.parse(localStorage.getItem(STORE)||"{}") }catch(e){ return {} } }
+function save(x){ localStorage.setItem(STORE, JSON.stringify(x)) }
+function resetAll(){ localStorage.removeItem(STORE); location.reload(); }
+
+async function sha256Hex(s){
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
+  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+
+/* Clear & simple grading
+   - F (Fail)            : score < 25 points
+   - P (Pass)            : 25 pts <= score < 50% of total
+   - P1 (Pass Level 1)   : 50%  <= pct < 65%
+   - C  (Credit)         : 65%  <= pct < 75%
+   - D  (Distinction)    : 75%  <= pct < 90%
+   - HD (High Distinction): pct >= 90%
+*/
+function computeGrade(score,total){
+  const pct = total? Math.round((score/total)*1000)/10 : 0;
+  let label="F";
+  if(score>=25 && pct<50) label="P";
+  if(pct>=50 && pct<65) label="P1";
+  if(pct>=65 && pct<75) label="C";
+  if(pct>=75 && pct<90) label="D";
+  if(pct>=90) label="HD";
+  return {pct,label};
+}
+
+function updateHeader(){
+  const saved=load();
+  const total = DATA.reduce((a,c)=>a+c.points,0);
+  const score = DATA.reduce((a,c)=> a + (saved[c.id]?c.points:0), 0);
+  const {pct,label} = computeGrade(score,total);
+  document.getElementById("score").textContent = `Score: ${score} / ${total} (${pct}%)`;
+  document.getElementById("prog").style.width = Math.min(100,pct)+"%";
+  document.getElementById("grade").textContent = `Grade: ${label}`;
+}
+
+function chapterPill(ch){ return `<span class="pill">${ch}</span>` }
+function diffPill(d,p){ return `<span class="pill">${d} • ${p} marks</span>` }
+
+function renderGrid(){
+  const grid=document.getElementById("grid"); grid.innerHTML="";
+  const saved=load();
+  for(const c of DATA){
+    const card=document.createElement("div"); card.className="card";
+    card.innerHTML = `
+      <div class="title">${c.id}. ${c.title}</div>
+      <div class="meta">${chapterPill(c.chapter)} ${diffPill(c.difficulty,c.points)} ${saved[c.id]?'<span class="ok">✓ Completed</span>':''}</div>
+      <div style="font-size:13px;min-height:48px">${c.description}</div>
+      <div class="row">
+        <button class="btn" onclick="openModal(${c.id})">Open</button>
+        <a class="btn secondary" href="${c.folder_url}" target="_blank">Folder</a>
+      </div>
+    `;
+    grid.appendChild(card);
   }
-  async function render(){
-    const res=await fetch("challenges.json"); const data=await res.json();
-    const ch=data.challenges; const list=document.getElementById("list"); const saved=load();
-    list.innerHTML=""; let total=0,score=0;
-    for(const c of ch){
-      total+=c.points; const done=!!saved[c.id];
-      if(done) score+=c.points;
-      const wrap=document.createElement("div"); wrap.className="card";
-      wrap.innerHTML=`
-        <div style="font-weight:700">${c.id}. ${c.title}</div>
-        <div class="meta">
-          <span class="pill">${c.chapter}</span>
-          <span class="pill">${c.difficulty} • ${c.points} marks</span>
-          ${done?'<span class="ok">✓ Completed</span>':''}
-          ${c.artifact_url?`<a style="color:#66e3ff" href="${c.artifact_url}">files</a>`:''}
-        </div>
-        <div style="font-size:13px">${c.description}</div>
-        <div style="font-size:13px;margin-top:6px"><b>Hint:</b> ${c.hint}</div>
-        <div class="row"><input id="f-${c.id}" placeholder="flag{...}" ${done?"disabled":""}>
-          <button ${done?"disabled":""} onclick="check(${c.id},'${c.flag_hash}')">Submit</button></div>`;
-      list.appendChild(wrap);
-    }
-    const {pct,g}=grade(score,total);
-    document.getElementById("score").textContent=`Score: ${score} / ${total} (${pct}%)`;
-    document.getElementById("prog").style.width=Math.min(100,pct)+"%";
-    const gd=document.getElementById("grade"); gd.textContent=g; gd.className="pill";
+}
+
+function openModal(id){
+  CURRENT = DATA.find(x=>x.id===id);
+  if(!CURRENT) return;
+  document.getElementById("m-title").textContent = `${CURRENT.id}. ${CURRENT.title}`;
+  document.getElementById("m-meta").innerHTML = `${chapterPill(CURRENT.chapter)} ${diffPill(CURRENT.difficulty, CURRENT.points)}`;
+  document.getElementById("m-desc").textContent = CURRENT.description;
+  document.getElementById("m-hint").textContent = CURRENT.hint;
+  document.getElementById("m-folder").href = CURRENT.folder_url;
+  document.getElementById("m-input").placeholder = CURRENT.input_placeholder || "Type your answer…";
+  const done = !!load()[CURRENT.id];
+  document.getElementById("m-done").style.display = done ? "block" : "none";
+  document.getElementById("overlay").style.display = "flex";
+  document.getElementById("m-input").value="";
+  setTimeout(()=>document.getElementById("m-input").focus(), 50);
+}
+function closeModal(){ document.getElementById("overlay").style.display="none"; }
+function closeModalOnEsc(e){ if(e.key==="Escape") closeModal(); }
+document.addEventListener("keydown", closeModalOnEsc);
+
+function toggleHint(){
+  const el=document.getElementById("m-hint");
+  el.style.display = el.style.display==="none" ? "block" : "none";
+}
+
+async function submitAnswer(){
+  const txt = document.getElementById("m-input").value.trim();
+  if(!txt){ alert("Please type an answer"); return; }
+  const digest = await sha256Hex(txt);
+  if(digest === CURRENT.answer_hash){
+    const s=load(); s[CURRENT.id]=true; save(s);
+    document.getElementById("m-done").style.display="block";
+    updateHeader(); renderGrid();
+  }else{
+    alert("Not correct yet. Keep going!");
   }
-  async function check(id,hash){
-    const el=document.getElementById("f-"+id);
-    const v=(el.value||"").trim();
-    if(!/^flag\{.*\}$/.test(v)) return alert("Use flag{...}");
-    const h=await sha256Hex(v);
-    if(h===hash){ const s=load(); s[id]=true; save(s); render(); }
-    else alert("Incorrect. Try again.");
-  }
-  render();
-</script></body></html>
+}
+
+async function main(){
+  const res = await fetch("challenges.json");
+  const data = await res.json();
+  DATA = data.challenges || [];
+  updateHeader();
+  renderGrid();
+}
+main();
+</script>
+</body>
+</html>
