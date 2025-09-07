@@ -1,0 +1,15 @@
+{
+  "challenges": [
+    {
+      "id": 6,
+      "title": "Street Terminal Boot",
+      "chapter": "Slum",
+      "difficulty": "Easy",
+      "points": 5,
+      "artifact_url": "./challenges/ch06-street-terminal-boot/README-student.md",
+      "description": "Find a flag left in plaintext inside a poorly written maintenance terminal binary.",
+      "hint": "Run `strings` or open the binary in Ghidra; no input required.",
+      "flag_hash": "REPLACE_ME"
+    }
+  ]
+}
