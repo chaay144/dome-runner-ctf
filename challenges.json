@@ -6,10 +6,11 @@
       "chapter": "Slum",
       "difficulty": "Easy",
       "points": 5,
-      "artifact_url": "./challenges/ch06-street-terminal-boot/README-student.md",
-      "description": "Find a flag left in plaintext inside a poorly written maintenance terminal binary.",
-      "hint": "Run `strings` or open the binary in Ghidra; no input required.",
-      "flag_hash": "REPLACE_ME"
+      "folder_url": "https://github.com/chaay144/dome-runner-ctf/tree/main/challenges/ch06-street-terminal-boot",
+      "description": "In the slums of Dome City, a maintenance terminal binary leaked sensitive data. Your job is to inspect the binary and recover the shutdown password.",
+      "hint": "Use tools like `strings` or open the binary in Ghidra. The answer is inside the program (no input required).",
+      "input_placeholder": "Type your answer (e.g. Al@rmShutD0wn!7z)",
+      "answer_hash": "d330e9fc7cb156d81a0ac8adf7fd2f73c10542f2f53c40067841e2536f32b43c"
     }
   ]
 }
