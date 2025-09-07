@@ -75,69 +75,8 @@
 </div>
 
 <script>
-let DATA=[], CURRENT=null;          // <-- in-memory only (no persistence)
-let RUN={}, TOTAL=0, SCORE=0;      // RUN[id]=true if solved during this session
-
-async function sha256Hex(s){
-  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
-  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");
-}
-
-function chapterPill(ch){ return `<span class="pill">${ch}</span>` }
-function diffPill(d,p){ return `<span class="pill">${d} • ${p} marks</span>` }
-
-function renderGrid(){
-  const grid=document.getElementById("grid"); grid.innerHTML="";
-  for(const c of DATA){
-    const card=document.createElement("div"); card.className="card";
-    const done = !!RUN[c.id];
-    card.innerHTML = `
-      <div class="title">${c.id}. ${c.title}</div>
-      <div class="meta">${chapterPill(c.chapter)} ${diffPill(c.difficulty,c.points)} ${done?'<span class="ok">✓ Completed</span>':''}</div>
-      <div style="font-size:13px;min-height:48px">${c.description}</div>
-      <div class="row">
-        <button class="btn" onclick="openModal(${c.id})">Open</button>
-        <a class="btn secondary btnlink" href="${c.folder_url}" target="_blank">Folder</a>
-      </div>
-    `;
-    grid.appendChild(card);
-  }
-}
-
-function openModal(id){
-  CURRENT = DATA.find(x=>x.id===id);
-  if(!CURRENT) return;
-  document.getElementById("m-title").textContent = `${CURRENT.id}. ${CURRENT.title}`;
-  document.getElementById("m-meta").innerHTML = `${chapterPill(CURRENT.chapter)} ${diffPill(CURRENT.difficulty, CURRENT.points)}`;
-  document.getElementById("m-desc").textContent = CURRENT.description;
-  document.getElementById("m-hint").textContent = CURRENT.hint;
-  document.getElementById("m-folder").href = CURRENT.folder_url;
-  document.getElementById("m-input").placeholder = CURRENT.input_placeholder || "Type your answer…";
-  document.getElementById("m-input").value="";
-  const fb=document.getElementById("m-feedback"); fb.textContent=""; fb.className="";
-  document.getElementById("overlay").style.display = "flex";
-  setTimeout(()=>document.getElementById("m-input").focus(), 50);
-}
-function closeModal(){ document.getElementById("overlay").style.display="none"; }
-function toggleHint(){ const el=document.getElementById("m-hint"); el.style.display = el.style.display==="none" ? "block" : "none"; }
-
-async function submitAnswer(){
-  const input = document.getElementById("m-input").value.trim();
-  const fb=document.getElementById("m-feedback");
-  if(!input){ fb.textContent="Type an answer"; fb.className="bad"; return; }
-  const digest = await sha256Hex(input);
-  if(digest === CURRENT.answer_hash){
-    RUN[CURRENT.id]=true;
-    SCORE = DATA.reduce((a,c)=> a + (RUN[c.id]?c.points:0), 0);
-    fb.textContent="✓ Correct"; fb.className="ok";
-    renderGrid();
-  }else{
-    fb.textContent="✗ Incorrect"; fb.className="bad";
-  }
-}
-
-// load data (INLINE — no fetch, just to get you unstuck)
-DATA = [
+/* ---------- DATA: add more challenges here later ---------- */
+const DATA = [
   {
     id: 6,
     title: "Street Terminal Boot",
@@ -151,9 +90,14 @@ DATA = [
     answer_hash: "5408eb37de42e51e9e66bbbfb20732c653a8b9b8de4b576f0b2d5a33b5fcd28f"
   }
 ];
-TOTAL = DATA.reduce((a,c)=>a+c.points,0);
-renderGrid();
-})();
-</script>
-</body>
-</html>
+/* --------------------------------------------------------- */
+
+const TOTAL = DATA.reduce((a,c)=>a+c.points,0);
+let RUN = {};            // session-only progress (resets on reload)
+let CURRENT = null;
+
+async function sha256Hex(s){
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
+  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+function chapterPill(ch){ return `<span class="pill">$
