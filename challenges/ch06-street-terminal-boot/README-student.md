@@ -16,7 +16,7 @@ Find the secret **password** embedded in the program and submit it on the websit
 - Or open it in **Ghidra** and browse the **.rodata** section.
 - No user input is required; the password is just present in memory.
 
-## Expected answer (for this exercise)
-**Al@rmShutD0wn!7z**
+## Expected answer
+DOME_BOOT_OK_7F3A
 
-> Educational note: In real CTFs you usually wouldn’t publish the answer here; we include it to show the complete workflow for your class demo.
+> Educational note: In real CTFs we usually wouldn’t publish the answer here; we include it to show the complete workflow for the class demo.
