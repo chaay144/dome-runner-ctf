@@ -1,16 +1,17 @@
-{
-  "challenges": [
-    {
-      "id": 6,
-      "title": "Street Terminal Boot",
-      "chapter": "Slum",
-      "difficulty": "Easy",
-      "points": 5,
-      "folder_url": "https://github.com/chaay144/dome-runner-ctf/tree/main/challenges/ch06-street-terminal-boot",
-      "description": "In the slums of Dome City, a maintenance terminal binary leaked sensitive data. Your job is to inspect the binary and recover the shutdown password.",
-      "hint": "Use tools like `strings` or open the binary in Ghidra. The answer is inside the program (no input required).",
-      "input_placeholder": "Type your answer (e.g. DOME_BOOT_OK_7F3A)",
-      "answer_hash": "5408eb37de42e51e9e66bbbfb20732c653a8b9b8de4b576f0b2d5a33b5fcd28f"
-    }
-  ]
-}
+// load data (INLINE — no fetch, just to get you unstuck)
+DATA = [
+  {
+    id: 6,
+    title: "Street Terminal Boot",
+    chapter: "Slum",
+    difficulty: "Easy",
+    points: 5,
+    folder_url: "https://github.com/chaay144/dome-runner-ctf/tree/main/challenges/ch06-street-terminal-boot",
+    description: "In the slums of Dome City, a maintenance terminal binary leaked sensitive data. Your job is to inspect the binary and recover the shutdown password.",
+    hint: "Use tools like `strings` or open the binary in Ghidra. The answer is inside the program (no input required).",
+    input_placeholder: "Type your answer (e.g. DOME_BOOT_OK_7F3A)",
+    answer_hash: "5408eb37de42e51e9e66bbbfb20732c653a8b9b8de4b576f0b2d5a33b5fcd28f"
+  }
+];
+TOTAL = DATA.reduce((a,c)=>a+c.points,0);
+renderGrid();
