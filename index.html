@@ -1,0 +1,85 @@
+<!doctype html><html><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dome Runner CTF</title>
+<style>
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;margin:0;background:#0b1020;color:#e7ecff}
+  header{padding:16px 20px;background:#121a33;position:sticky;top:0}
+  h1{margin:0;font-size:22px} .sub{color:#9db0f5;font-size:13px}
+  main{max-width:900px;margin:0 auto;padding:20px}
+  .card{border:1px solid #2a355d;border-radius:14px;padding:14px;margin:10px 0;background:#11193a}
+  .meta{font-size:12px;color:#c9d4ff;margin:6px 0}
+  input{width:60%;max-width:420px;padding:8px;border-radius:10px;border:1px solid #2a355d;background:#0c132a;color:#e7ecff}
+  button{margin-left:8px;padding:8px 12px;border-radius:10px;border:0;background:#66e3ff;font-weight:700}
+  .ok{color:#87ff87;font-weight:700;font-size:12px;margin-left:6px}
+  .bar{height:10px;background:#0c132a;border:1px solid #2a355d;border-radius:999px;overflow:hidden}
+  .bar>span{display:block;height:100%;background:#66e3ff;width:0%}
+  .row{display:flex;gap:12px;align-items:center;margin:12px 0}
+  .pill{padding:2px 8px;border:1px solid #2a355d;border-radius:999px;font-size:11px;margin-right:6px}
+</style></head><body>
+<header>
+  <h1>🏙️ Dome Runner CTF</h1>
+  <div class="sub">All flags use <b>flag{...}</b>. Easy=5, Medium=10, Hard=15. Grades auto-calc.</div>
+</header>
+<main>
+  <div class="row">
+    <div id="score" style="font-weight:800">Score: 0 / 0 (0%)</div>
+    <div class="bar" style="flex:1"><span id="prog"></span></div>
+    <div id="grade" class="pill">—</div>
+    <button onclick="resetAll()">Reset Progress</button>
+  </div>
+  <div id="list"></div>
+</main>
+<script>
+  const STORE="dome_runner_progress_v1";
+  function load(){try{return JSON.parse(localStorage.getItem(STORE)||"{}")}catch(e){return {}}}
+  function save(x){localStorage.setItem(STORE,JSON.stringify(x))}
+  function resetAll(){localStorage.removeItem(STORE); location.reload()}
+  async function sha256Hex(s){const b=new TextEncoder().encode(s);const d=await crypto.subtle.digest("SHA-256",b);return[...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,"0")).join("")}
+  function grade(score,total){
+    const pct=Math.round((score/total)*1000)/10;
+    let g="—";
+    if(score<25) g="F1";
+    if(score>30) g="P2";
+    if(pct===50) g="P1";
+    if(pct>50) g="C";
+    if(pct>75) g="D";
+    if(pct>90) g="HD";
+    return {pct,g};
+  }
+  async function render(){
+    const res=await fetch("challenges.json"); const data=await res.json();
+    const ch=data.challenges; const list=document.getElementById("list"); const saved=load();
+    list.innerHTML=""; let total=0,score=0;
+    for(const c of ch){
+      total+=c.points; const done=!!saved[c.id];
+      if(done) score+=c.points;
+      const wrap=document.createElement("div"); wrap.className="card";
+      wrap.innerHTML=`
+        <div style="font-weight:700">${c.id}. ${c.title}</div>
+        <div class="meta">
+          <span class="pill">${c.chapter}</span>
+          <span class="pill">${c.difficulty} • ${c.points} marks</span>
+          ${done?'<span class="ok">✓ Completed</span>':''}
+          ${c.artifact_url?`<a style="color:#66e3ff" href="${c.artifact_url}">files</a>`:''}
+        </div>
+        <div style="font-size:13px">${c.description}</div>
+        <div style="font-size:13px;margin-top:6px"><b>Hint:</b> ${c.hint}</div>
+        <div class="row"><input id="f-${c.id}" placeholder="flag{...}" ${done?"disabled":""}>
+          <button ${done?"disabled":""} onclick="check(${c.id},'${c.flag_hash}')">Submit</button></div>`;
+      list.appendChild(wrap);
+    }
+    const {pct,g}=grade(score,total);
+    document.getElementById("score").textContent=`Score: ${score} / ${total} (${pct}%)`;
+    document.getElementById("prog").style.width=Math.min(100,pct)+"%";
+    const gd=document.getElementById("grade"); gd.textContent=g; gd.className="pill";
+  }
+  async function check(id,hash){
+    const el=document.getElementById("f-"+id);
+    const v=(el.value||"").trim();
+    if(!/^flag\{.*\}$/.test(v)) return alert("Use flag{...}");
+    const h=await sha256Hex(v);
+    if(h===hash){ const s=load(); s[id]=true; save(s); render(); }
+    else alert("Incorrect. Try again.");
+  }
+  render();
+</script></body></html>
