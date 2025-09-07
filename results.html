@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- vFINAL-1 -->
 <html>
 <head>
 <meta charset="utf-8"/>
@@ -25,12 +26,8 @@
   <div class="card">
     <div class="row">
       <div id="score" class="pill">Score: 0 / 0 (0%)</div>
-      <div id="grade" class="pill">Grade: —</div>
     </div>
     <div class="bar" style="margin:12px 0 6px"><span id="prog"></span></div>
-    <div style="font-size:13px;color:#cfe0ff">
-      Grading: F (&lt;25 pts) • P (≥25 pts &amp; &lt;50%) • P1 (≥50% &amp; &lt;65%) • C (≥65% &amp; &lt;75%) • D (≥75% &amp; &lt;90%) • HD (≥90%)
-    </div>
   </div>
 
   <div class="card" id="list"></div>
@@ -41,40 +38,32 @@
 </main>
 
 <script>
-function computeGrade(score,total){
-  const pct = total? Math.round((score/total)*1000)/10 : 0;
-  let label="F";
-  if(score>=25 && pct<50) label="P";
-  if(pct>=50 && pct<65) label="P1";
-  if(pct>=65 && pct<75) label="C";
-  if(pct>=75 && pct<90) label="D";
-  if(pct>=90) label="HD";
-  return {pct,label};
-}
+(function(){
+  const RUN = JSON.parse(sessionStorage.getItem('RUN') || '{}');
+  const DATA = JSON.parse(sessionStorage.getItem('DATA') || '[]');
 
-const RUN = JSON.parse(sessionStorage.getItem("RUN")||"{}");
-const DATA = JSON.parse(sessionStorage.getItem("DATA")||"[]");
+  function render(){
+    const total = DATA.reduce((a,c)=>a+c.points,0);
+    const score = DATA.reduce((a,c)=> a + (RUN[c.id]?c.points:0), 0);
+    const pct = total ? Math.round((score/total)*1000)/10 : 0;
 
-function render(){
-  const total = DATA.reduce((a,c)=>a+c.points,0);
-  const score = DATA.reduce((a,c)=> a + (RUN[c.id]?c.points:0), 0);
-  const {pct,label}=computeGrade(score,total);
-  document.getElementById("score").textContent = `Score: ${score} / ${total} (${pct}%)`;
-  document.getElementById("prog").style.width = Math.min(100,pct)+"%";
-  document.getElementById("grade").textContent = `Grade: ${label}`;
+    document.getElementById('score').textContent = `Score: ${score} / ${total} (${pct}%)`;
+    document.getElementById('prog').style.width = Math.min(100,pct) + '%';
 
-  const list=document.getElementById("list");
-  list.innerHTML = "<div style='font-weight:700;margin-bottom:8px'>Per-challenge:</div>";
-  for(const c of DATA){
-    const ok = !!RUN[c.id];
-    const li = document.createElement("div");
-    li.style = "display:flex;justify-content:space-between;padding:6px 0;border-top:1px solid rgba(255,255,255,.08)";
-    li.innerHTML = `<div>${c.id}. ${c.title} <span style="color:#9db0f5;font-size:12px">(${c.difficulty} • ${c.points}m)</span></div>
-                    <div style="font-weight:800;${ok?'color:#87ff87':'color:#ff6b6b'}">${ok?'✓':'✗'}</div>`;
-    list.appendChild(li);
+    const list=document.getElementById('list');
+    list.innerHTML = "<div style='font-weight:700;margin-bottom:8px'>Per-challenge:</div>";
+    for(const c of DATA){
+      const ok = !!RUN[c.id];
+      const row = document.createElement('div');
+      row.style = 'display:flex;justify-content:space-between;padding:6px 0;border-top:1px solid rgba(255,255,255,.08)';
+      row.innerHTML =
+        `<div>${c.id}. ${c.title} <span style="color:#9db0f5;font-size:12px">(${c.difficulty} • ${c.points}m)</span></div>`+
+        `<div style="font-weight:800;${ok?'color:#87ff87':'color:#ff6b6b'}">${ok?'✓':'✗'}</div>`;
+      list.appendChild(row);
+    }
   }
-}
-render();
+  render();
+})();
 </script>
 </body>
 </html>
