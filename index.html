@@ -3,85 +3,144 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Dome Runner CTF — Results</title>
+<title>Dome Runner CTF</title>
 <style>
-  :root{--bg:#0b1020;--card:#121a33;--muted:#9db0f5;--text:#e7ecff;--accent:#66e3ff;--accent2:#7bffb3}
-  *{box-sizing:border-box} body{margin:0;background:#0b1020;color:var(--text);font-family:system-ui,Inter,Segoe UI,Roboto,Arial}
-  main{max-width:800px;margin:0 auto;padding:24px}
-  h1{margin:0 0 8px 0} .sub{color:var(--muted);font-size:13px}
-  .card{margin-top:16px;background:#121a33;border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:16px}
-  .bar{height:12px;border-radius:999px;background:#0c132a;border:1px solid #23305a;overflow:hidden}
-  .bar>span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%}
-  .pill{padding:4px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.18);display:inline-block}
-  .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-  .btn{border:0;background:linear-gradient(135deg,var(--accent),var(--accent2));padding:8px 12px;border-radius:12px;color:#001018;font-weight:800;cursor:pointer;text-decoration:none}
+  :root{--bg:#0b1020;--card:#121a33;--muted:#9db0f5;--text:#e7ecff;--accent:#66e3ff;--accent2:#7bffb3;--ok:#87ff87;--bad:#ff6b6b}
+  *{box-sizing:border-box}
+  body{margin:0;background:#0b1020;color:var(--text);font-family:system-ui,Inter,Segoe UI,Roboto,Arial}
+  header{padding:18px 20px;background:#121a33;position:sticky;top:0;z-index:5;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+  h1{margin:0;font-size:22px}
+  .sub{color:var(--muted);font-size:13px}
+  main{max-width:1100px;margin:0 auto;padding:20px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+  .card{background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px}
+  .title{font-weight:700;margin-bottom:6px}
+  .meta{display:flex;gap:8px;flex-wrap:wrap;color:#cfe0ff;font-size:12px;margin-bottom:8px}
+  .pill{padding:3px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.18);font-size:12px}
+  .btn{border:0;background:linear-gradient(135deg,var(--accent),var(--accent2));padding:8px 12px;border-radius:12px;color:#001018;font-weight:800;cursor:pointer}
+  .btn.secondary{background:transparent;color:var(--text);border:1px solid rgba(255,255,255,.2)}
+  a.btnlink{color:#001018;text-decoration:none}
+  /* Modal */
+  .overlay{position:fixed;inset:0;background:rgba(0,0,20,.6);display:none;align-items:center;justify-content:center;padding:16px}
+  .modal{max-width:720px;width:100%;background:#0f1734;border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:16px}
+  .row{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap}
+  input[type=text]{flex:1;min-width:240px;background:#0c132a;border:1px solid rgba(255,255,255,.15);border-radius:10px;color:var(--text);padding:8px 10px}
+  .ok{color:var(--ok);font-weight:800;font-size:12px}
+  .bad{color:var(--bad);font-weight:800;font-size:12px}
+  .hint{font-size:13px;color:#d8defd;margin-top:8px}
+  .hint-toggle{cursor:pointer;color:#aee8ff;text-decoration:underline}
 </style>
 </head>
 <body>
+<header>
+  <div>
+    <h1 style="margin-bottom:6px">🏙️ Dome Runner CTF</h1>
+    <div class="sub">Answers can be any string (not only <code>flag{...}</code>). Click a challenge → read the folder → submit.</div>
+  </div>
+  <div class="row" style="margin:0">
+    <a class="btn btnlink" href="results.html">View Results</a>
+  </div>
+</header>
+
 <main>
-  <h1>Results</h1>
-  <div class="sub">This page summarizes your score for the current session (reload resets progress).</div>
-
-  <div class="card">
-    <div class="row">
-      <div id="score" class="pill">Score: 0 / 0 (0%)</div>
-      <div id="grade" class="pill">Grade: —</div>
-    </div>
-    <div class="bar" style="margin:12px 0 6px"><span id="prog"></span></div>
-    <div style="font-size:13px;color:#cfe0ff">
-      Grading: F (&lt;25 pts) • P (≥25 pts &amp; &lt;50%) • P1 (≥50% &amp; &lt;65%) • C (≥65% &amp; &lt;75%) • D (≥75% &amp; &lt;90%) • HD (≥90%)
-    </div>
-  </div>
-
-  <div class="card" id="list"></div>
-
-  <div class="row" style="margin-top:14px">
-    <a class="btn" href="index.html">Back to challenges</a>
-  </div>
+  <div id="grid" class="grid"></div>
 </main>
 
+<!-- Modal -->
+<div id="overlay" class="overlay" onclick="closeModal(event)">
+  <div id="modal" class="modal" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div id="m-title" class="title"></div>
+      <button class="btn secondary" onclick="closeModal()">Close</button>
+    </div>
+    <div class="meta" id="m-meta"></div>
+    <div id="m-desc" style="font-size:14px;line-height:1.5"></div>
+
+    <div class="hint">
+      <span class="hint-toggle" onclick="toggleHint()">▼ View Hint</span>
+      <div id="m-hint" style="display:none;margin-top:6px"></div>
+    </div>
+
+    <div class="row">
+      <a id="m-folder" class="btn btnlink" target="_blank">Open Challenge Folder</a>
+      <span style="font-size:12px;color:#9db0f5">Read scenario + files on GitHub</span>
+    </div>
+
+    <div class="row">
+      <input type="text" id="m-input" placeholder="Type your answer…">
+      <button class="btn" onclick="submitAnswer()">Submit</button>
+      <div id="m-feedback" style="min-width:100px"></div>
+    </div>
+  </div>
+</div>
+
 <script>
-let DATA=[], RUN={}; // read from opener if available
-// Try to import session state from the opener tab/window (same origin)
-if (window.opener && window.opener.RUN && window.opener.DATA){
-  RUN = window.opener.RUN; DATA = window.opener.DATA;
+let DATA=[], CURRENT=null;          // <-- in-memory only (no persistence)
+let RUN={}, TOTAL=0, SCORE=0;      // RUN[id]=true if solved during this session
+
+async function sha256Hex(s){
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
+  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");
 }
 
-function computeGrade(score,total){
-  const pct = total? Math.round((score/total)*1000)/10 : 0;
-  let label="F";
-  if(score>=25 && pct<50) label="P";
-  if(pct>=50 && pct<65) label="P1";
-  if(pct>=65 && pct<75) label="C";
-  if(pct>=75 && pct<90) label="D";
-  if(pct>=90) label="HD";
-  return {pct,label};
-}
+function chapterPill(ch){ return `<span class="pill">${ch}</span>` }
+function diffPill(d,p){ return `<span class="pill">${d} • ${p} marks</span>` }
 
-function render(){
-  const total = DATA.reduce((a,c)=>a+c.points,0);
-  const score = DATA.reduce((a,c)=> a + (RUN[c.id]?c.points:0), 0);
-  const {pct,label}=computeGrade(score,total);
-  document.getElementById("score").textContent = `Score: ${score} / ${total} (${pct}%)`;
-  document.getElementById("prog").style.width = Math.min(100,pct)+"%";
-  document.getElementById("grade").textContent = `Grade: ${label}`;
-
-  const list=document.getElementById("list");
-  list.innerHTML = "<div style='font-weight:700;margin-bottom:8px'>Per-challenge:</div>";
+function renderGrid(){
+  const grid=document.getElementById("grid"); grid.innerHTML="";
   for(const c of DATA){
-    const ok = !!RUN[c.id];
-    const li = document.createElement("div");
-    li.style = "display:flex;justify-content:space-between;padding:6px 0;border-top:1px solid rgba(255,255,255,.08)";
-    li.innerHTML = `<div>${c.id}. ${c.title} <span style="color:#9db0f5;font-size:12px">(${c.difficulty} • ${c.points}m)</span></div>
-                    <div style="font-weight:800;${ok?'color:#87ff87':'color:#ff6b6b'}">${ok?'✓':'✗'}</div>`;
-    list.appendChild(li);
+    const card=document.createElement("div"); card.className="card";
+    const done = !!RUN[c.id];
+    card.innerHTML = `
+      <div class="title">${c.id}. ${c.title}</div>
+      <div class="meta">${chapterPill(c.chapter)} ${diffPill(c.difficulty,c.points)} ${done?'<span class="ok">✓ Completed</span>':''}</div>
+      <div style="font-size:13px;min-height:48px">${c.description}</div>
+      <div class="row">
+        <button class="btn" onclick="openModal(${c.id})">Open</button>
+        <a class="btn secondary btnlink" href="${c.folder_url}" target="_blank">Folder</a>
+      </div>
+    `;
+    grid.appendChild(card);
   }
 }
 
+function openModal(id){
+  CURRENT = DATA.find(x=>x.id===id);
+  if(!CURRENT) return;
+  document.getElementById("m-title").textContent = `${CURRENT.id}. ${CURRENT.title}`;
+  document.getElementById("m-meta").innerHTML = `${chapterPill(CURRENT.chapter)} ${diffPill(CURRENT.difficulty, CURRENT.points)}`;
+  document.getElementById("m-desc").textContent = CURRENT.description;
+  document.getElementById("m-hint").textContent = CURRENT.hint;
+  document.getElementById("m-folder").href = CURRENT.folder_url;
+  document.getElementById("m-input").placeholder = CURRENT.input_placeholder || "Type your answer…";
+  document.getElementById("m-input").value="";
+  const fb=document.getElementById("m-feedback"); fb.textContent=""; fb.className="";
+  document.getElementById("overlay").style.display = "flex";
+  setTimeout(()=>document.getElementById("m-input").focus(), 50);
+}
+function closeModal(){ document.getElementById("overlay").style.display="none"; }
+function toggleHint(){ const el=document.getElementById("m-hint"); el.style.display = el.style.display==="none" ? "block" : "none"; }
+
+async function submitAnswer(){
+  const input = document.getElementById("m-input").value.trim();
+  const fb=document.getElementById("m-feedback");
+  if(!input){ fb.textContent="Type an answer"; fb.className="bad"; return; }
+  const digest = await sha256Hex(input);
+  if(digest === CURRENT.answer_hash){
+    RUN[CURRENT.id]=true;
+    SCORE = DATA.reduce((a,c)=> a + (RUN[c.id]?c.points:0), 0);
+    fb.textContent="✓ Correct"; fb.className="ok";
+    renderGrid();
+  }else{
+    fb.textContent="✗ Incorrect"; fb.className="bad";
+  }
+}
+
+// load data
 (async function(){
   const res = await fetch("challenges.json"); const data = await res.json();
-  if(!DATA.length) DATA = data.challenges || [];
-  render();
+  DATA = data.challenges || []; TOTAL = DATA.reduce((a,c)=>a+c.points,0);
+  renderGrid();
 })();
 </script>
 </body>
