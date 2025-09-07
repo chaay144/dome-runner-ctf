@@ -1,61 +1,45 @@
 <!doctype html>
-<!-- vTEST-1 -->
 <html>
-  <head>
-    <meta charset="utf-8">
-    <title>CTF Minimal Test</title>
-  </head>
-  <body>
-    <h1>CTF Minimal Test</h1>
-    <div id="grid"></div>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Dome Runner CTF</title>
+<style>
+  :root{--bg:#0b1020;--card:#121a33;--muted:#9db0f5;--text:#e7ecff;--accent:#66e3ff;--accent2:#7bffb3;--ok:#87ff87;--bad:#ff6b6b}
+  *{box-sizing:border-box}
+  body{margin:0;background:#0b1020;color:var(--text);font-family:system-ui,Inter,Segoe UI,Roboto,Arial}
+  header{padding:18px 20px;background:#121a33;position:sticky;top:0;z-index:5;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+  h1{margin:0;font-size:22px}
+  .sub{color:var(--muted);font-size:13px}
+  main{max-width:1100px;margin:0 auto;padding:20px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+  .card{background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px}
+  .title{font-weight:700;margin-bottom:6px}
+  .meta{display:flex;gap:8px;flex-wrap:wrap;color:#cfe0ff;font-size:12px;margin-bottom:8px}
+  .pill{padding:3px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.18);font-size:12px}
+  .btn{border:0;background:linear-gradient(135deg,var(--accent),var(--accent2));padding:8px 12px;border-radius:12px;color:#001018;font-weight:800;cursor:pointer}
+  .btn.secondary{background:transparent;color:var(--text);border:1px solid rgba(255,255,255,.2)}
+  a.btnlink{color:#001018;text-decoration:none}
+  /* Modal */
+  .overlay{position:fixed;inset:0;background:rgba(0,0,20,.6);display:none;align-items:center;justify-content:center;padding:16px}
+  .modal{max-width:720px;width:100%;background:#0f1734;border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:16px}
+  .row{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap}
+  input[type=text]{flex:1;min-width:240px;background:#0c132a;border:1px solid rgba(255,255,255,.15);border-radius:10px;color:var(--text);padding:8px 10px}
+  .ok{color:var(--ok);font-weight:800;font-size:12px}
+  .bad{color:var(--bad);font-weight:800;font-size:12px}
+  .hint{font-size:13px;color:#d8defd;margin-top:8px}
+  .hint-toggle{cursor:pointer;color:#aee8ff;text-decoration:underline}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1 style="margin-bottom:6px">🏙️ Dome Runner CTF</h1>
+    <div class="sub">Answers can be any string (not only <code>flag{...}</code>). Click a challenge → read the folder → submit.</div>
+  </div>
+  <div class="row" style="margin:0">
+    <a class="btn btnlink" href="results.html">View Results</a>
+  </div>
+</header>
 
-    <script>
-      // If you can see a card below this heading, JS is running and data is rendering.
-      const DATA = [
-        {
-          id: 6,
-          title: "Street Terminal Boot",
-          chapter: "Slum",
-          difficulty: "Easy",
-          points: 5,
-          folder_url: "https://github.com/chaay144/dome-runner-ctf/tree/main/challenges/ch06-street-terminal-boot",
-          description: "Find the shutdown password inside the binary.",
-          hint: "Use `strings` or view .rodata in Ghidra.",
-          answer_hash: "5408eb37de42e51e9e66bbbfb20732c653a8b9b8de4b576f0b2d5a33b5fcd28f",
-          input_placeholder: "DOME_BOOT_OK_7F3A"
-        }
-      ];
-
-      function render() {
-        const g = document.getElementById('grid');
-        if (!g) { document.body.innerHTML += "<p>grid not found</p>"; return; }
-        const c = DATA[0];
-        g.innerHTML =
-          "<div>" +
-            "<h3>" + c.id + ". " + c.title + "</h3>" +
-            "<p><b>Chapter:</b> " + c.chapter + " | <b>Diff:</b> " + c.difficulty + " | <b>Points:</b> " + c.points + "</p>" +
-            "<p>" + c.description + "</p>" +
-            "<p><a href='" + c.folder_url + "' target='_blank'>Open Challenge Folder</a></p>" +
-            "<input id='ans' placeholder='" + (c.input_placeholder||"Type answer") + "'>" +
-            "<button onclick='submitAns()'>Submit</button> " +
-            "<span id='fb'></span>" +
-          "</div>";
-      }
-
-      async function sha256Hex(s){
-        const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
-        return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");
-      }
-      async function submitAns(){
-        const v = (document.getElementById("ans").value||"").trim();
-        const h = await sha256Hex(v);
-        document.getElementById("fb").textContent =
-          (h === DATA[0].answer_hash) ? "✓ Correct" : "✗ Incorrect";
-      }
-
-      render();
-      // If you see "JS OK" below, the script ran at least once.
-      document.body.insertAdjacentHTML("beforeend","<p style='color:gray'>JS OK</p>");
-    </script>
-  </body>
-</html>
+<main>
