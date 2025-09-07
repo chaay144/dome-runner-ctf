@@ -8,7 +8,7 @@
   :root{--bg:#0b1020;--card:#121a33;--muted:#9db0f5;--text:#e7ecff;--accent:#66e3ff;--accent2:#7bffb3}
   *{box-sizing:border-box} body{margin:0;background:#0b1020;color:var(--text);font-family:system-ui,Inter,Segoe UI,Roboto,Arial}
   main{max-width:800px;margin:0 auto;padding:24px}
-  h1{margin:0 0 8px 0} .sub{color:var(--muted);font-size:13px}
+  h1{margin:0 0 8px 0} .sub{color:#9db0f5;font-size:13px}
   .card{margin-top:16px;background:#121a33;border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:16px}
   .bar{height:12px;border-radius:999px;background:#0c132a;border:1px solid #23305a;overflow:hidden}
   .bar>span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%}
@@ -41,12 +41,6 @@
 </main>
 
 <script>
-let DATA=[], RUN={}; // read from opener if available
-// Try to import session state from the opener tab/window (same origin)
-if (window.opener && window.opener.RUN && window.opener.DATA){
-  RUN = window.opener.RUN; DATA = window.opener.DATA;
-}
-
 function computeGrade(score,total){
   const pct = total? Math.round((score/total)*1000)/10 : 0;
   let label="F";
@@ -57,6 +51,9 @@ function computeGrade(score,total){
   if(pct>=90) label="HD";
   return {pct,label};
 }
+
+const RUN = JSON.parse(sessionStorage.getItem("RUN")||"{}");
+const DATA = JSON.parse(sessionStorage.getItem("DATA")||"[]");
 
 function render(){
   const total = DATA.reduce((a,c)=>a+c.points,0);
@@ -77,12 +74,7 @@ function render(){
     list.appendChild(li);
   }
 }
-
-(async function(){
-  const res = await fetch("challenges.json"); const data = await res.json();
-  if(!DATA.length) DATA = data.challenges || [];
-  render();
-})();
+render();
 </script>
 </body>
 </html>
