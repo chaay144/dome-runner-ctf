@@ -1,7 +1,8 @@
-(async () => {
-  const s = "DOME_BOOT_OK_7F3A";        // exact text, no spaces
-  const b = new TextEncoder().encode(s);
-  const d = await crypto.subtle.digest("SHA-256", b);
-  const hex = [...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,'0')).join('');
-  console.log(hex);
-})();
+#include <stdio.h>
+int main(){
+  puts("Maintenance v0.1");
+  const char *leak = "DOME_BOOT_OK_7F3A";
+  (void) leak;
+  puts("System OK");
+  return 0;
+}
