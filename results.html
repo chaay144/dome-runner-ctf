@@ -25,6 +25,13 @@
     .ok{color:var(--ok);font-weight:800}
     .bad{color:var(--bad);font-weight:800}
     .siteRow{background:rgba(255,255,255,.04);font-weight:800}
+    .grade{font-weight:900;border-radius:999px;padding:6px 10px}
+    .g-hd{background:#053; color:#b6ffd6}
+    .g-d{background:#0b2c66;color:#c9e5ff}
+    .g-c{background:#2a3a0b;color:#dbffb6}
+    .g-p1{background:#3a2d0b;color:#ffe8b6}
+    .g-f1{background:#3a0b0b;color:#ffb6b6}
+    .g-f2{background:#4a0b0b;color:#ffd2d2;border:1px solid #ff9a9a}
   </style>
 </head>
 <body>
@@ -38,7 +45,10 @@
 
     <div class="card">
       <div class="row" style="justify-content:space-between">
-        <div id="scoreText" class="pill">Score: 0 / 0 (0%)</div>
+        <div>
+          <div id="scoreText" class="pill">Score: 0 / 0 (0%)</div>
+          <div id="gradeText" style="margin-top:6px"></div>
+        </div>
         <button class="btn secondary" id="btnClear">Clear progress</button>
       </div>
       <div class="bar" style="margin-top:10px"><span id="prog" style="width:0%"></span></div>
@@ -62,7 +72,7 @@
   </main>
 
   <script>
-    // Keep in sync with index.html (IDS, titles, sites, points)
+    // Keep in sync with index.html
     const DATA = [
       { id:6, site:"Slum",           title:"Street Terminal Boot", points:5  },
       { id:7, site:"Industrial Park",title:"Opcode Gate",          points:10 },
@@ -73,6 +83,7 @@
     const tbody   = document.querySelector("#tbl tbody");
     const prog    = document.getElementById("prog");
     const scoreEl = document.getElementById("scoreText");
+    const gradeEl = document.getElementById("gradeText");
     const btnClear= document.getElementById("btnClear");
 
     function readScoreFor(id){
@@ -80,13 +91,14 @@
       return v ? parseInt(v,10) : 0;
     }
 
-    function groupBySite(list){
-      const g = {};
-      for(const c of list){
-        g[c.site] = g[c.site] || [];
-        g[c.site].push(c);
-      }
-      return g;
+    function gradeFromPct(p){
+      // thresholds per your rules
+      if (p >= 90) return {label:"HD — High Distinction", cls:"g-hd"};
+      if (p > 75)  return {label:"D — Distinction",       cls:"g-d"};
+      if (p > 50)  return {label:"C — Credit",            cls:"g-c"};
+      if (p === 50)return {label:"P1 — Pass",             cls:"g-p1"};
+      if (p < 20)  return {label:"F2 — Fail Level 2",     cls:"g-f2"};
+      return {label:"F1 — Fail",                          cls:"g-f1"};
     }
 
     function render(){
@@ -94,10 +106,18 @@
       let total=0, got=0;
       for(const c of DATA) total += c.points, got += readScoreFor(c.id);
       const pct = total ? Math.round((got/total)*1000)/10 : 0;
+
+      // Score + bar
       scoreEl.textContent = `Score: ${got} / ${total} (${pct}%)`;
       prog.style.width = Math.min(100,pct) + "%";
 
-      const by = groupBySite(DATA);
+      // Grade
+      const g = gradeFromPct(pct);
+      gradeEl.innerHTML = `<span class="grade ${g.cls}">${g.label}</span>`;
+
+      // Group by site (fixed order)
+      const by = {};
+      for(const c of DATA){ (by[c.site] ||= []).push(c); }
       const siteOrder = ["Power Station","CBD","Slum","Jail","Industrial Park"];
       for(const site of siteOrder){
         const arr = by[site] || [];
