@@ -1,9 +1,9 @@
-# Challenge 9: Final Relay
-**Chapter:** Final Relay Station  
+# Challenge 9: Power Station
+**Chapter:** Power Station 
 **Difficulty:** Hard (15 marks)
 
 ## Scenario
-At the final relay station, the access program does **not store the password as plain text**. Instead, it reconstructs the expected string using an algorithm at runtime. Each element in a hidden number array is **offset by its index**, and the program reverses that math in a loop before comparing to your input.
+At the Power Station, the access program does **not store the password as plain text**. Instead, it reconstructs the expected string using an algorithm at runtime. Each element in a hidden number array is **offset by its index**, and the program reverses that math in a loop before comparing to your input.
 
 Your job: **reverse the reconstruction** and recover the shutdown code.
 
