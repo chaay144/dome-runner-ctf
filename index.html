@@ -21,7 +21,7 @@
     /* Site cards */
     .site{position:relative;height:180px;border-radius:18px;overflow:hidden;cursor:pointer;border:1px solid rgba(255,255,255,.15)}
     .site .bg{position:absolute;inset:0;background-size:cover;background-position:center;filter:brightness(.62);transform:scale(1.05)}
-    .site .scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 30%, rgba(0,0,0,.5))}
+    .site .scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 30%, rgba(0,0,0,.55))}
     .site .content{position:absolute;left:16px;right:16px;bottom:12px}
     .site h2{margin:0 0 6px 0;font-size:20px}
     .pill{display:inline-block;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.18);font-size:12px;margin-right:6px}
@@ -55,7 +55,7 @@
   <header>
     <div>
       <h1 style="margin-bottom:6px">🏙️ Dome Runner CTF</h1>
-      <div class="sub">Start by choosing a <b>site</b>. Each site has challenges. Answers can be any string (not only <code>flag{...}</code>).</div>
+      <div class="sub">Choose a <b>site</b>. Each site has challenges. Answers can be any string (not only <code>flag{...}</code>).</div>
     </div>
     <div class="row">
       <a class="btn primary btnlink" href="results.html">View Results</a>
@@ -69,7 +69,7 @@
   </main>
 
   <!-- Site Modal: lists challenges for a site -->
-  <div id="siteOverlay" class="overlay" onclick="closeSite(event)">
+  <div id="siteOverlay" class="overlay">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="row" style="margin-bottom:6px">
         <div>
@@ -83,7 +83,7 @@
   </div>
 
   <!-- Challenge Modal: submit answer -->
-  <div id="chalOverlay" class="overlay" onclick="closeChal(event)">
+  <div id="chalOverlay" class="overlay">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="row" style="margin-bottom:6px">
         <div>
@@ -116,31 +116,31 @@
         key: "power",
         name: "Power Station",
         blurb: "The Dome’s energy core and relays. Expect control systems and protocol quirks.",
-        bg: "https://images.unsplash.com/photo-1509395176047-4a66953fd231?auto=format&fit=crop&w=1600&q=60"
+        bg: "https://source.unsplash.com/1600x900/?power-station,industrial,energy,plant"
       },
       {
         key: "cbd",
         name: "CBD",
         blurb: "Corporate block – validators, auth systems, and hardened binaries.",
-        bg: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&w=1600&q=60"
+        bg: "https://source.unsplash.com/1600x900/?city,skyscrapers,buildings,night"
       },
       {
         key: "slum",
         name: "Slum",
         blurb: "Forgotten terminals and leaked data. Great starting point for recon.",
-        bg: "https://images.unsplash.com/photo-1532453288672-3a27e9be9efd?auto=format&fit=crop&w=1600&q=60"
+        bg: "https://source.unsplash.com/1600x900/?slum,alley,old-neighborhood"
       },
       {
         key: "jail",
         name: "Jail",
         blurb: "Prison systems with improvised crypto and sloppy storage.",
-        bg: "https://images.unsplash.com/photo-1558888400-16e2b76af9c0?auto=format&fit=crop&w=1600&q=60"
+        bg: "https://source.unsplash.com/1600x900/?prison,jail,bars"
       },
       {
         key: "industrial",
         name: "Industrial Park",
         blurb: "Manufacturing nodes and access gates – watch for simple opcode tricks.",
-        bg: "https://images.unsplash.com/photo-1509395176047-4a66953fd231?auto=format&fit=crop&w=1600&q=60"
+        bg: "https://source.unsplash.com/1600x900/?factory,industrial,warehouse"
       }
     ];
 
@@ -243,7 +243,7 @@
           div.className = "card";
           div.innerHTML = `
             <div class="title">${c.id}. ${c.title}</div>
-            <div class="meta">${c.difficulty} • ${c.points} marks ${done?'<span class="ok">✓ Completed</span>':''}</div>
+            <div class="meta">${site.name} • ${c.difficulty} • ${c.points} marks ${done?'<span class="ok">✓ Completed</span>':''}</div>
             <div style="min-height:48px;font-size:14px">${c.description}</div>
             <div class="row" style="margin-top:8px">
               <button class="btn primary">Open</button>
@@ -255,8 +255,9 @@
         }
       }
       siteOverlay.style.display = "flex";
+      siteOverlay.onclick = (e)=>{ if(e.target===siteOverlay) closeSite(); };
     }
-    function closeSite(ev){ if(ev && ev.target && !ev.currentTarget) return; siteOverlay.style.display="none"; }
+    function closeSite(){ siteOverlay.style.display="none"; }
 
     // --- challenge modal ---
     const chalOverlay = document.getElementById("chalOverlay");
@@ -273,8 +274,9 @@
 
     function openChal(c){
       CURRENT = c;
+      const siteName = SITES.find(s=>s.key===c.site).name;
       cTitle.textContent = `${c.id}. ${c.title}`;
-      cMeta.innerHTML = `${SITES.find(s=>s.key===c.site).name} • ${c.difficulty} • ${c.points} marks`;
+      cMeta.innerHTML = `${siteName} • ${c.difficulty} • ${c.points} marks`;
       cDesc.textContent = c.description;
       cFolder.href = c.folder_url;
       answerInput.placeholder = c.input_placeholder || "Type your answer…";
@@ -285,9 +287,10 @@
       hintBody.style.display = "none";
       hintToggle.textContent = "▼ Show Hint";
       chalOverlay.style.display = "flex";
+      chalOverlay.onclick = (e)=>{ if(e.target===chalOverlay) closeChal(); };
       setTimeout(()=>answerInput.focus(), 80);
     }
-    function closeChal(ev){ if(ev && ev.target && !ev.currentTarget) return; chalOverlay.style.display="none"; }
+    function closeChal(){ chalOverlay.style.display="none"; }
 
     hintToggle.onclick = () => {
       const show = (hintBody.style.display==="none");
@@ -312,7 +315,7 @@
       if(dig === CURRENT.answer_hash){
         feedback.innerHTML = "<span class='ok'>✓ Correct</span>";
         localStorage.setItem("ch"+CURRENT.id, CURRENT.points);
-        // also refresh the site modal list to show ✓ Completed
+        // refresh the site modal list to show ✓ Completed
         openSite(CURRENT.site);
       }else{
         feedback.innerHTML = "<span class='bad'>✗ Incorrect</span>";
