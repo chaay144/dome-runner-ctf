@@ -1,69 +1,116 @@
 <!doctype html>
-<!-- vFINAL-CTF results -->
 <html>
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Dome Runner CTF — Results</title>
-<style>
-  :root{--bg:#0b1020;--card:#121a33;--muted:#9db0f5;--text:#e7ecff;--accent:#66e3ff;--accent2:#7bffb3}
-  *{box-sizing:border-box} body{margin:0;background:#0b1020;color:var(--text);font-family:system-ui,Inter,Segoe UI,Roboto,Arial}
-  main{max-width:800px;margin:0 auto;padding:24px}
-  h1{margin:0 0 8px 0} .sub{color:#9db0f5;font-size:13px}
-  .card{margin-top:16px;background:#121a33;border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:16px}
-  .bar{height:12px;border-radius:999px;background:#0c132a;border:1px solid #23305a;overflow:hidden}
-  .bar>span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%}
-  .pill{padding:4px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.18);display:inline-block}
-  .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-  .btn{border:0;background:linear-gradient(135deg,var(--accent),var(--accent2));padding:8px 12px;border-radius:12px;color:#001018;font-weight:800;cursor:pointer;text-decoration:none}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dome Runner CTF — Results</title>
+  <style>
+    :root{
+      --bg:#0b102e;--card:#112a33;--muted:#90b6f5;--text:#e7ecff;--accent:#06e3ff;--accent2:#7bffb3;
+      --ok:#87ff87;--bad:#ff6b6b
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Inter,Segoe UI,Roboto,Arial}
+    header{padding:18px;background:var(--card);position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between}
+    h1{margin:0;font-size:22px}
+    main{max-width:900px;margin:0 auto;padding:24px}
+    .card{background:linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:18px;margin-top:14px}
+    .btn{display:inline-block;padding:10px 16px;border-radius:12px;font-weight:700;cursor:pointer;border:0}
+    .btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#001018;text-decoration:none}
+    .btn.secondary{background:transparent;border:1px solid rgba(255,255,255,.3);color:var(--text)}
+    .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+    .bar{height:12px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;border:1px solid rgba(255,255,255,.15)}
+    .bar>span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%}
+    .pill{padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.15);font-size:12px}
+    .ok{color:var(--ok);font-weight:800}
+    .bad{color:var(--bad);font-weight:800}
+    table{width:100%;border-collapse:collapse;margin-top:8px}
+    th,td{padding:10px;border-top:1px solid rgba(255,255,255,.1);text-align:left}
+    th{color:#cfe6ff;font-weight:700}
+  </style>
 </head>
 <body>
-<main>
-  <h1>Results</h1>
-  <div class="sub">This page summarizes your score for the current session (reload resets progress).</div>
+  <header>
+    <h1>Results</h1>
+    <a href="index.html" class="btn primary">Back to challenges</a>
+  </header>
 
-  <div class="card">
-    <div class="row">
-      <div id="score" class="pill">Score: 0 / 0 (0%)</div>
+  <main>
+    <p class="pill">This summary uses your device’s local progress (localStorage). Clearing progress resets this page.</p>
+
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <div id="scoreText" class="pill">Score: 0 / 0 (0%)</div>
+        <button class="btn secondary" id="btnClear">Clear progress</button>
+      </div>
+      <div class="bar" style="margin-top:10px"><span id="prog" style="width:0%"></span></div>
     </div>
-    <div class="bar" style="margin:12px 0 6px"><span id="prog"></span></div>
-  </div>
 
-  <div class="card" id="list"></div>
+    <div class="card">
+      <div style="font-weight:800;margin-bottom:6px">Per-challenge</div>
+      <table id="tbl">
+        <thead>
+          <tr>
+            <th style="width:64px">ID</th>
+            <th>Title</th>
+            <th style="width:120px">Marks</th>
+            <th style="width:100px">Status</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </main>
 
-  <div class="row" style="margin-top:14px">
-    <a class="btn" href="index.html">Back to challenges</a>
-  </div>
-</main>
+  <script>
+    // Keep in sync with index.html
+    const DATA = [
+      { id:6, title:"Street Terminal Boot", points:5 },
+      { id:7, title:"Opcode Gate",         points:10 },
+      { id:8, title:"Branch Mispredict",   points:15 }
+    ];
 
-<script>
-(function(){
-  const RUN = JSON.parse(sessionStorage.getItem('RUN') || '{}');
-  const DATA = JSON.parse(sessionStorage.getItem('DATA') || '[]');
+    const tbody   = document.querySelector("#tbl tbody");
+    const prog    = document.getElementById("prog");
+    const scoreEl = document.getElementById("scoreText");
+    const btnClear= document.getElementById("btnClear");
 
-  function render(){
-    const total = DATA.reduce((a,c)=>a+c.points,0);
-    const score = DATA.reduce((a,c)=> a + (RUN[c.id]?c.points:0), 0);
-    const pct = total ? Math.round((score/total)*1000)/10 : 0;
-
-    document.getElementById('score').textContent = `Score: ${score} / ${total} (${pct}%)`;
-    document.getElementById('prog').style.width = Math.min(100,pct) + '%';
-
-    const list=document.getElementById('list');
-    list.innerHTML = "<div style='font-weight:700;margin-bottom:8px'>Per-challenge:</div>";
-    for(const c of DATA){
-      const ok = !!RUN[c.id];
-      const row = document.createElement('div');
-      row.style = 'display:flex;justify-content:space-between;padding:6px 0;border-top:1px solid rgba(255,255,255,.08)';
-      row.innerHTML =
-        `<div>${c.id}. ${c.title} <span style="color:#9db0f5;font-size:12px">(${c.difficulty} • ${c.points}m)</span></div>`+
-        `<div style="font-weight:800;${ok?'color:#87ff87':'color:#ff6b6b'}">${ok?'✓':'✗'}</div>`;
-      list.appendChild(row);
+    function readScoreFor(id){
+      const v = localStorage.getItem("ch"+id);
+      return v ? parseInt(v,10) : 0;
     }
-  }
-  render();
-})();
-</script>
+
+    function render(){
+      tbody.innerHTML = "";
+      let total = 0, got = 0;
+
+      for(const c of DATA){
+        total += c.points;
+        const my = readScoreFor(c.id);
+        got += my;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${c.id}</td>
+          <td>${c.title}</td>
+          <td>${my} / ${c.points}</td>
+          <td>${my>0 ? "<span class='ok'>✓ Correct</span>" : "<span class='bad'>✗ Not solved</span>"}</td>
+        `;
+        tbody.appendChild(tr);
+      }
+
+      const pct = total ? Math.round((got/total)*1000)/10 : 0;
+      scoreEl.textContent = `Score: ${got} / ${total} (${pct}%)`;
+      prog.style.width = Math.min(100, pct) + "%";
+    }
+
+    btnClear.onclick = () => {
+      for(const c of DATA) localStorage.removeItem("ch"+c.id);
+      render();
+      alert("Progress cleared for challenges 6–8.");
+    };
+
+    render();
+  </script>
 </body>
 </html>
