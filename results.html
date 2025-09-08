@@ -3,331 +3,154 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Dome Runner CTF</title>
+  <title>Dome Runner CTF — Results</title>
   <style>
-    :root{
-      --bg:#0b1020;--text:#e7ecff;--muted:#a6b8ff;
-      --card:#111b3a;--accent:#09d6ff;--accent2:#7bffb3;
-      --ok:#87ff87;--bad:#ff6b6b
-    }
+    :root{--bg:#0b1020;--text:#e7ecff;--card:#111b3a;--accent:#09d6ff;--accent2:#7bffb3;--ok:#87ff87;--bad:#ff6b6b}
     *{box-sizing:border-box}
     body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Inter,Segoe UI,Roboto,Arial}
-    header{padding:18px;background:#121a33;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;position:sticky;top:0;z-index:10}
+    header{padding:18px;background:#121a33;display:flex;align-items:center;justify-content:space-between}
     h1{margin:0;font-size:22px}
-    .sub{color:var(--muted);font-size:13px}
-    main{max-width:1200px;margin:0 auto;padding:24px}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
-
-    /* Site cards */
-    .site{position:relative;height:180px;border-radius:18px;overflow:hidden;cursor:pointer;border:1px solid rgba(255,255,255,.15)}
-    .site .bg{position:absolute;inset:0;background-size:cover;background-position:center;filter:brightness(.62);transform:scale(1.05)}
-    .site .scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 30%, rgba(0,0,0,.55))}
-    .site .content{position:absolute;left:16px;right:16px;bottom:12px}
-    .site h2{margin:0 0 6px 0;font-size:20px}
-    .pill{display:inline-block;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.18);font-size:12px;margin-right:6px}
-
-    /* Modals */
-    .overlay{position:fixed;inset:0;background:rgba(0,0,20,.65);display:none;align-items:center;justify-content:center;padding:16px;z-index:20}
-    .modal{max-width:900px;width:100%;background:#0f1734;border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:18px}
-    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    .btn{border:0;padding:10px 14px;border-radius:12px;font-weight:800;cursor:pointer}
+    main{max-width:1000px;margin:0 auto;padding:24px}
+    .btn{display:inline-block;padding:10px 16px;border-radius:12px;font-weight:700;cursor:pointer;border:0;text-decoration:none}
     .btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#001018}
-    .btn.secondary{background:transparent;color:var(--text);border:1px solid rgba(255,255,255,.25)}
-    a.btnlink{color:#001018;text-decoration:none}
-    .x{margin-left:auto}
-
-    /* Challenge list inside site modal */
-    .challenge-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-top:10px}
-    .card{background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:14px}
-    .title{font-weight:800;margin-bottom:6px}
-    .meta{font-size:12px;color:#cfe0ff;margin-bottom:8px}
+    .btn.secondary{background:transparent;border:1px solid rgba(255,255,255,.28);color:var(--text)}
+    .card{background:linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:16px;margin-top:14px}
+    .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+    .pill{padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.15);font-size:12px}
+    .bar{height:12px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;border:1px solid rgba(255,255,255,.15)}
+    .bar>span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%}
+    table{width:100%;border-collapse:collapse;margin-top:8px}
+    th,td{padding:10px;border-top:1px solid rgba(255,255,255,.1);text-align:left}
+    th{color:#cfe6ff}
     .ok{color:var(--ok);font-weight:800}
     .bad{color:var(--bad);font-weight:800}
-
-    /* Challenge submit modal */
-    input[type=text]{flex:1;min-width:220px;background:#0c132a;border:1px solid rgba(255,255,255,.2);border-radius:10px;color:var(--text);padding:8px 10px}
-    .hintbox{margin-top:8px;background:#0b1330;border:1px dashed rgba(255,255,255,.25);border-radius:10px}
-    .hint-header{display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:pointer;color:#aee8ff}
-    .hint-body{display:none;padding:8px 10px;border-top:1px dashed rgba(255,255,255,.18);color:#d8defd;font-size:14px}
+    .siteRow{background:rgba(255,255,255,.04);font-weight:800}
+    .grade{font-weight:900;border-radius:999px;padding:6px 10px}
+    .g-hd{background:#053; color:#b6ffd6}
+    .g-d{background:#0b2c66;color:#c9e5ff}
+    .g-c{background:#2a3a0b;color:#dbffb6}
+    .g-p1{background:#3a2d0b;color:#ffe8b6}
+    .g-f1{background:#3a0b0b;color:#ffb6b6}
+    .g-f2{background:#4a0b0b;color:#ffd2d2;border:1px solid #ff9a9a}
   </style>
 </head>
 <body>
   <header>
-    <div>
-      <h1 style="margin-bottom:6px">🏙️ Dome Runner CTF</h1>
-      <div class="sub">Choose a <b>site</b>. Each site has challenges. Answers can be any string (not only <code>flag{...}</code>).</div>
-    </div>
-    <div class="row">
-      <a class="btn primary btnlink" href="results.html">View Results</a>
-      <button class="btn secondary" id="resetBtn">Reset Progress</button>
-    </div>
+    <h1>Results</h1>
+    <a href="index.html" class="btn primary">Back to challenges</a>
   </header>
 
   <main>
-    <h3 style="margin:0 0 10px 2px;color:#cfe6ff">Sites</h3>
-    <div id="siteGrid" class="grid"></div>
+    <p class="pill">This summary uses your device’s local progress (localStorage). “Clear progress” lets you test again.</p>
+
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <div>
+          <div id="scoreText" class="pill">Score: 0 / 0 (0%)</div>
+          <div id="gradeText" style="margin-top:6px"></div>
+        </div>
+        <button class="btn secondary" id="btnClear">Clear progress</button>
+      </div>
+      <div class="bar" style="margin-top:10px"><span id="prog" style="width:0%"></span></div>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:800;margin-bottom:6px">Per-site & per-challenge</div>
+      <table id="tbl">
+        <thead>
+          <tr>
+            <th style="width:140px">Site</th>
+            <th style="width:64px">ID</th>
+            <th>Title</th>
+            <th style="width:120px">Marks</th>
+            <th style="width:120px">Status</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
   </main>
 
-  <!-- Site Modal: lists challenges for a site -->
-  <div id="siteOverlay" class="overlay">
-    <div class="modal" onclick="event.stopPropagation()">
-      <div class="row" style="margin-bottom:6px">
-        <div>
-          <div id="siteTitle" class="title" style="font-size:20px"></div>
-          <div id="siteBlurb" class="sub"></div>
-        </div>
-        <button class="btn secondary x" onclick="closeSite()">Close</button>
-      </div>
-      <div id="siteChallengeGrid" class="challenge-grid"></div>
-    </div>
-  </div>
-
-  <!-- Challenge Modal: submit answer -->
-  <div id="chalOverlay" class="overlay">
-    <div class="modal" onclick="event.stopPropagation()">
-      <div class="row" style="margin-bottom:6px">
-        <div>
-          <div id="cTitle" class="title" style="font-size:20px"></div>
-          <div id="cMeta" class="meta"></div>
-        </div>
-        <a id="cFolder" class="btn primary btnlink x" target="_blank">Open Challenge Folder</a>
-        <button class="btn secondary" onclick="closeChal()">Close</button>
-      </div>
-      <div id="cDesc" style="font-size:14px;line-height:1.6;margin-bottom:8px"></div>
-
-      <!-- Hint dropdown -->
-      <div class="hintbox">
-        <div class="hint-header" id="hintToggle">▼ Show Hint</div>
-        <div class="hint-body" id="hintBody"></div>
-      </div>
-
-      <div class="row" style="margin-top:10px">
-        <input type="text" id="answerInput" placeholder="Type your answer…">
-        <button class="btn primary" id="submitBtn">Submit</button>
-        <div id="feedback" style="min-width:120px"></div>
-      </div>
-    </div>
-  </div>
-
   <script>
-    /* -------------------- DATA -------------------- */
-    const SITES = [
-      {
-        key: "power",
-        name: "Power Station",
-        blurb: "The Dome’s energy core and relays. Expect control systems and protocol quirks.",
-        bg: "https://www.datocms-assets.com/75979/1750869695-thermal-power.png"
-      },
-      {
-        key: "cbd",
-        name: "CBD",
-        blurb: "Corporate block – validators, auth systems, and hardened binaries.",
-        bg: "https://assets.nationbuilder.com/mooresandbox/pages/7035/attachments/original/1739837607/Aerial_Townhallsquare_Tower_before-WEB.jpg?1739837607"
-      },
-      {
-        key: "slum",
-        name: "Slum",
-        blurb: "Forgotten terminals and leaked data. Great starting point for recon.",
-        bg: "https://www.brookings.edu/wp-content/uploads/2017/04/seriesimg_wolfensohncenterfordevelopmentworkingpapers.jpg?quality=75&w=1500"
-      },
-      {
-        key: "jail",
-        name: "Jail",
-        blurb: "Prison systems with improvised crypto and sloppy storage.",
-        bg: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRPnHzas2gELOcM64AGABVNM5FkOndV22NxFA&s"
-      },
-      {
-        key: "industrial",
-        name: "Industrial Park",
-        blurb: "Manufacturing nodes and access gates – watch for simple opcode tricks.",
-        bg: "https://www.propertycouncil.com.au/wp-content/uploads/2025/04/Untitled-design-72.png"
-      }
-    ];
-
-    // Current challenges (you can add more later; each site can have up to 5)
+    // Keep in sync with index.html
     const DATA = [
-      {
-        id: 6,
-        site: "slum",
-        title: "Street Terminal Boot",
-        difficulty: "Easy",
-        points: 5,
-        folder_url: "https://github.com/chaay144/dome-runner-ctf/tree/main/challenges/ch06-street-terminal-boot",
-        description: "A maintenance terminal binary leaked sensitive data. Inspect and recover the shutdown password.",
-        hint: "Use `strings` or open the binary in Ghidra. The answer is stored directly in the program.",
-        input_placeholder: "Enter shutdown key…",
-        // SHA-256 of DOME_BOOT_OK_7F3A
-        answer_hash: "5408eb37de42e51e9e66bbbfb20732c653a8b9b8de4b576f0b2d5a33b5fcd28f"
-      },
-      {
-        id: 7,
-        site: "industrial",
-        title: "Opcode Gate",
-        difficulty: "Medium",
-        points: 10,
-        folder_url: "https://github.com/chaay144/dome-runner-ctf/tree/main/challenges/ch07-opcode-gate",
-        description: "The gate binary hides its passphrase with XOR. Reverse the decode loop and recover the string.",
-        hint: "Find the encoded byte array and XOR key (0x13). Decode to reveal the passphrase.",
-        input_placeholder: "Enter the passphrase…",
-        // SHA-256 of ACCESS_GRANTED_XOR
-        answer_hash: "88749139f99fc8ee3f1a7475f251f2ee201d15d91b1ee7d5fefc1a144f012f57"
-      },
-      {
-        id: 8,
-        site: "cbd",
-        title: "Branch Mispredict",
-        difficulty: "Hard",
-        points: 15,
-        folder_url: "https://github.com/chaay144/dome-runner-ctf/tree/main/challenges/ch08-branch-mispredict",
-        description: "The validator always rejects you. Flip the conditional jump (JE/JNE) or discover the correct input.",
-        hint: "Find XREFs to 'Access denied'. The compare + conditional jump above it controls success vs failure.",
-        input_placeholder: "Enter the shutdown key…",
-        // SHA-256 of ACCESS_OVERRIDE_CBD
-        answer_hash: "36145b77c4132ea68c863f8831f4f8a3b4766385c4bf3b0bf294dad792d7e2c0"
-      },
-      {
-        id: 9,
-        site: "power",
-        title: "Final Relay",
-        difficulty: "Hard",
-        points: 15,
-        folder_url: "https://github.com/chaay144/dome-runner-ctf/tree/main/challenges/ch09-final-relay",
-        description: "The program reconstructs a hidden code by subtracting an index-based offset from each array element.",
-        hint: "Watch the loop: expected[i] = arr[i] - i*3. Undo it to reveal the string.",
-        input_placeholder: "Enter the shutdown code…",
-        // SHA-256 of FINAL_RELAY_UNLOCK
-        answer_hash: "bb46cab0262711c63cf74670e1669a21909bc7d3b3a9f6e523d1cee378aefbe9"
-      }
+      { id:6, site:"Slum",           title:"Street Terminal Boot", points:5  },
+      { id:7, site:"Industrial Park",title:"Opcode Gate",          points:10 },
+      { id:8, site:"CBD",            title:"Branch Mispredict",    points:15 },
+      { id:9, site:"Power Station",  title:"Final Relay",          points:15 }
     ];
-    /* ------------------------------------------------ */
 
-    // --- render site cards ---
-    const siteGrid = document.getElementById("siteGrid");
-    SITES.forEach(s => {
-      const card = document.createElement("div");
-      card.className = "site";
-      card.innerHTML = `
-        <div class="bg" style="background-image:url('${s.bg}')"></div>
-        <div class="scrim"></div>
-        <div class="content">
-          <h2>${s.name}</h2>
-          <div class="sub">${s.blurb}</div>
-          <div style="margin-top:6px">
-            <span class="pill">Challenges: ${DATA.filter(d=>d.site===s.key).length} / 5</span>
-          </div>
-        </div>
-      `;
-      card.onclick = () => openSite(s.key);
-      siteGrid.appendChild(card);
-    });
+    const tbody   = document.querySelector("#tbl tbody");
+    const prog    = document.getElementById("prog");
+    const scoreEl = document.getElementById("scoreText");
+    const gradeEl = document.getElementById("gradeText");
+    const btnClear= document.getElementById("btnClear");
 
-    // --- site modal ---
-    const siteOverlay = document.getElementById("siteOverlay");
-    const siteTitle = document.getElementById("siteTitle");
-    const siteBlurb = document.getElementById("siteBlurb");
-    const siteChallengeGrid = document.getElementById("siteChallengeGrid");
+    function readScoreFor(id){
+      const v = localStorage.getItem("ch"+id);
+      return v ? parseInt(v,10) : 0;
+    }
 
-    function openSite(siteKey){
-      const site = SITES.find(x=>x.key===siteKey);
-      siteTitle.textContent = site.name;
-      siteBlurb.textContent = site.blurb;
-      siteChallengeGrid.innerHTML = "";
+    function gradeFromPct(p){
+      // thresholds per your rules
+      if (p >= 90) return {label:"HD — High Distinction", cls:"g-hd"};
+      if (p > 75)  return {label:"D — Distinction",       cls:"g-d"};
+      if (p > 50)  return {label:"C — Credit",            cls:"g-c"};
+      if (p === 50)return {label:"P1 — Pass",             cls:"g-p1"};
+      if (p < 20)  return {label:"F2 — Fail Level 2",     cls:"g-f2"};
+      return {label:"F1 — Fail",                          cls:"g-f1"};
+    }
 
-      const list = DATA.filter(c=>c.site===siteKey).sort((a,b)=>a.id-b.id);
-      if(list.length===0){
-        siteChallengeGrid.innerHTML = `<div class="sub">No challenges here yet. Check back soon.</div>`;
-      }else{
-        for(const c of list){
-          const done = (parseInt(localStorage.getItem("ch"+c.id)||"0",10) > 0);
-          const div = document.createElement("div");
-          div.className = "card";
-          div.innerHTML = `
-            <div class="title">${c.id}. ${c.title}</div>
-            <div class="meta">${site.name} • ${c.difficulty} • ${c.points} marks ${done?'<span class="ok">✓ Completed</span>':''}</div>
-            <div style="min-height:48px;font-size:14px">${c.description}</div>
-            <div class="row" style="margin-top:8px">
-              <button class="btn primary">Open</button>
-              <a class="btn secondary btnlink" href="${c.folder_url}" target="_blank">Folder</a>
-            </div>
+    function render(){
+      tbody.innerHTML = "";
+      let total=0, got=0;
+      for(const c of DATA) total += c.points, got += readScoreFor(c.id);
+      const pct = total ? Math.round((got/total)*1000)/10 : 0;
+
+      // Score + bar
+      scoreEl.textContent = `Score: ${got} / ${total} (${pct}%)`;
+      prog.style.width = Math.min(100,pct) + "%";
+
+      // Grade
+      const g = gradeFromPct(pct);
+      gradeEl.innerHTML = `<span class="grade ${g.cls}">${g.label}</span>`;
+
+      // Group by site (fixed order)
+      const by = {};
+      for(const c of DATA){ (by[c.site] ||= []).push(c); }
+      const siteOrder = ["Power Station","CBD","Slum","Jail","Industrial Park"];
+      for(const site of siteOrder){
+        const arr = by[site] || [];
+        if(arr.length===0) continue;
+
+        // site divider row
+        const trS = document.createElement("tr");
+        trS.className = "siteRow";
+        trS.innerHTML = `<td colspan="5">${site}</td>`;
+        tbody.appendChild(trS);
+
+        for(const c of arr){
+          const my = readScoreFor(c.id);
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${site}</td>
+            <td>${c.id}</td>
+            <td>${c.title}</td>
+            <td>${my} / ${c.points}</td>
+            <td>${my>0 ? "<span class='ok'>✓ Correct</span>" : "<span class='bad'>✗ Not solved</span>"}</td>
           `;
-          div.querySelector("button").onclick = () => openChal(c);
-          siteChallengeGrid.appendChild(div);
+          tbody.appendChild(tr);
         }
       }
-      siteOverlay.style.display = "flex";
-      siteOverlay.onclick = (e)=>{ if(e.target===siteOverlay) closeSite(); };
-    }
-    function closeSite(){ siteOverlay.style.display="none"; }
-
-    // --- challenge modal ---
-    const chalOverlay = document.getElementById("chalOverlay");
-    const cTitle = document.getElementById("cTitle");
-    const cMeta = document.getElementById("cMeta");
-    const cDesc = document.getElementById("cDesc");
-    const cFolder = document.getElementById("cFolder");
-    const answerInput = document.getElementById("answerInput");
-    const submitBtn = document.getElementById("submitBtn");
-    const feedback = document.getElementById("feedback");
-    const hintToggle = document.getElementById("hintToggle");
-    const hintBody = document.getElementById("hintBody");
-    let CURRENT = null;
-
-    function openChal(c){
-      CURRENT = c;
-      const siteName = SITES.find(s=>s.key===c.site).name;
-      cTitle.textContent = `${c.id}. ${c.title}`;
-      cMeta.innerHTML = `${siteName} • ${c.difficulty} • ${c.points} marks`;
-      cDesc.textContent = c.description;
-      cFolder.href = c.folder_url;
-      answerInput.placeholder = c.input_placeholder || "Type your answer…";
-      answerInput.value = "";
-      feedback.textContent = "";
-      feedback.className = "";
-      hintBody.textContent = c.hint;
-      hintBody.style.display = "none";
-      hintToggle.textContent = "▼ Show Hint";
-      chalOverlay.style.display = "flex";
-      chalOverlay.onclick = (e)=>{ if(e.target===chalOverlay) closeChal(); };
-      setTimeout(()=>answerInput.focus(), 80);
-    }
-    function closeChal(){ chalOverlay.style.display="none"; }
-
-    hintToggle.onclick = () => {
-      const show = (hintBody.style.display==="none");
-      hintBody.style.display = show ? "block" : "none";
-      hintToggle.textContent = show ? "▲ Hide Hint" : "▼ Show Hint";
-    };
-
-    async function sha256(s){
-      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
-      return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");
     }
 
-    submitBtn.onclick = async () => {
-      if(!CURRENT) return;
-      const val = answerInput.value.trim();
-      if(!val){
-        feedback.textContent = "Type an answer";
-        feedback.className = "bad";
-        return;
-      }
-      const dig = await sha256(val);
-      if(dig === CURRENT.answer_hash){
-        feedback.innerHTML = "<span class='ok'>✓ Correct</span>";
-        localStorage.setItem("ch"+CURRENT.id, CURRENT.points);
-        // refresh the site modal list to show ✓ Completed
-        openSite(CURRENT.site);
-      }else{
-        feedback.innerHTML = "<span class='bad'>✗ Incorrect</span>";
-        localStorage.setItem("ch"+CURRENT.id, 0);
-      }
-    };
-
-    // reset progress
-    document.getElementById("resetBtn").onclick = () => {
+    btnClear.onclick = () => {
       for(const c of DATA) localStorage.removeItem("ch"+c.id);
-      alert("Progress cleared for current challenges.");
+      render();
+      alert("Progress cleared for listed challenges.");
     };
+
+    render();
   </script>
 </body>
 </html>
